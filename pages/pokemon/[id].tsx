@@ -110,13 +110,24 @@ export const getStaticPaths: GetStaticPaths = async (ctx) => {
   );
   return {
     paths: pokemons151.map((id: string) => ({ params: { id: id } })),
-    fallback: false,
+    // fallback: false,
+    fallback: "blocking",
   };
 };
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const { id } = params as { id: string };
+  const pokemon = await getPokemonInfo(id);
+  if (!pokemon) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
   return {
-    props: { pokemon: await getPokemonInfo(id) },
+    props: { pokemon: pokemon },
+    revalidate: 86400, //60 * 60 *24, // esta opcion genera los nuvos pokemos cad 24 horas
   };
 };
 export default PokemonPage;
